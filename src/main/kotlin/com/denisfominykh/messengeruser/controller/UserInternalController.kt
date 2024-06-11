@@ -1,11 +1,11 @@
 package com.denisfominykh.messengeruser.controller
 
+import com.denisfominykh.messengeruser.service.UserService
 import com.denisfominykh.messengeruser.view.LoginBody
 import com.denisfominykh.messengeruser.view.LoginView
 import com.denisfominykh.messengeruser.view.RegisterBody
 import com.denisfominykh.messengeruser.view.TokenExchangeView
 import com.denisfominykh.messengeruser.view.UserView
-import com.denisfominykh.messengeruser.service.UserService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping

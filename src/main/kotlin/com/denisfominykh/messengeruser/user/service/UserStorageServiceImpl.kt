@@ -1,12 +1,12 @@
 package com.denisfominykh.messengeruser.user.service
 
-import com.denisfominykh.messengeruser.user.exception.SequenceNotFoundException
-import com.denisfominykh.messengeruser.user.repository.UserRepository
 import com.denisfominykh.messengeruser.sequence.SequenceModel
 import com.denisfominykh.messengeruser.sequence.repository.SequenceRepository
 import com.denisfominykh.messengeruser.service.UserStorageService
 import com.denisfominykh.messengeruser.user.User
 import com.denisfominykh.messengeruser.user.UserModel
+import com.denisfominykh.messengeruser.user.exception.SequenceNotFoundException
+import com.denisfominykh.messengeruser.user.repository.UserRepository
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrNull
 
@@ -23,7 +23,6 @@ class UserStorageServiceImpl(
         return repository.findByUserName(userName)?.intoCore()
     }
 
-    // TODO: TRANSACTION
     override fun save(user: User): User {
         increaseSequence(user.id)
         return repository.save(UserModel.fromCore(user)).intoCore()
@@ -33,7 +32,7 @@ class UserStorageServiceImpl(
         return repository.existsByUserName(username)
     }
 
-    override fun findLastId(): Long { // TODO: AUTOINCREMENT
+    override fun findLastId(): Long {
         val lastValue = sequenceRepository.findById("user").getOrNull()
         if (lastValue == null) {
             sequenceRepository.save(

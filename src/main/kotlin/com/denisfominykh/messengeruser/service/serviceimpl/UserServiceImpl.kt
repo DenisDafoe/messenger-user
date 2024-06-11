@@ -6,8 +6,9 @@ import com.denisfominykh.messengeruser.result.LoginResult
 import com.denisfominykh.messengeruser.result.TokenExchangeResult
 import com.denisfominykh.messengeruser.service.UserService
 import com.denisfominykh.messengeruser.service.UserStorageService
-import com.denisfominykh.messengeruser.user.User
 import com.denisfominykh.messengeruser.tool.UserToken
+import com.denisfominykh.messengeruser.tools.SecuritySupporter
+import com.denisfominykh.messengeruser.user.User
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
 import java.time.Instant
@@ -17,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom
 class UserServiceImpl(
     private val storageService: UserStorageService,
     private val md5MessageDigest: MessageDigest,
+    private val securitySupporter: SecuritySupporter,
 ) : UserService {
     override fun registerUser(
         username: String,
@@ -28,7 +30,10 @@ class UserServiceImpl(
         }
 
         val id = storageService.findLastId().inc()
-        return storageService.save(User(id, username, region, hashedPassword, null))
+        val salt = securitySupporter.generateSalt()
+        val passwordHashedWithSalt = securitySupporter.hashPwdWithSalt(hashedPassword, salt)
+
+        return storageService.save(User(id, username, region, passwordHashedWithSalt, salt, null))
     }
 
     override fun attemptLogin(
@@ -38,11 +43,12 @@ class UserServiceImpl(
         val user = storageService.findByUserName(userName)
 
         if (isUserLoginSuccess(user, hashedPassword)) {
-            val updatedUser = if (!tokenIsAlive(user?.token)) {
-                storageService.save(updateToken(requireNotNull(user)))
-            } else {
-                user!!
-            }
+            val updatedUser =
+                if (!tokenIsAlive(user?.token)) {
+                    storageService.save(updateToken(requireNotNull(user)))
+                } else {
+                    user!!
+                }
 
             return LoginResult.success(updatedUser.token!!)
         }
@@ -70,14 +76,13 @@ class UserServiceImpl(
             bytes.add(random.nextInt().toByte())
         }
 
-        md5MessageDigest.update(bytes.toByteArray())
-
-        return md5MessageDigest.digest().toHexString(HexFormat.UpperCase)
+        return md5MessageDigest.digest(bytes.toByteArray()).toHexString(HexFormat.UpperCase)
     }
 
     private fun tokenIsAlive(token: UserToken?) = token != null && Instant.now().isBefore(token.willExpire)
 
-    private fun isUserLoginSuccess(user: User?, hashedPassword: String): Boolean =
-        user != null && user.hashedPassword == hashedPassword
-
+    private fun isUserLoginSuccess(
+        user: User?,
+        hashedPassword: String,
+    ): Boolean = user != null && user.hashedPassword == securitySupporter.hashPwdWithSalt(hashedPassword, user.salt)
 }

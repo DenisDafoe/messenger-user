@@ -10,7 +10,5 @@ interface UserRepository : MongoRepository<UserModel, Long> {
 
     fun existsByUserName(username: String): Boolean
 
-//    @Query(value = "{'token.token': '?token'}")
-//    fun findByTokenValue(token: String): UserModel?
     fun findByToken_Token(token: String): UserModel?
 }

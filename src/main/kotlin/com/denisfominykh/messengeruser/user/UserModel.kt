@@ -11,23 +11,28 @@ class UserModel(
     val userName: String,
     val region: Region,
     val hashedPassword: String,
+    val salt: String,
     val token: UserTokenModel?,
 ) {
-    fun intoCore() = User(
-        id,
-        userName,
-        region,
-        hashedPassword,
-        token?.intoCore()
-    )
+    fun intoCore() =
+        User(
+            id,
+            userName,
+            region,
+            hashedPassword,
+            salt,
+            token?.intoCore(),
+        )
 
     companion object {
-        fun fromCore(user: User) = UserModel(
-            user.id,
-            user.username,
-            user.region,
-            user.hashedPassword,
-            UserTokenModel.fromCoreNullable(user.token)
-        )
+        fun fromCore(user: User) =
+            UserModel(
+                user.id,
+                user.username,
+                user.region,
+                user.hashedPassword,
+                user.salt,
+                UserTokenModel.fromCoreNullable(user.token),
+            )
     }
 }

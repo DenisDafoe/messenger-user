@@ -8,7 +8,7 @@ class UserToken(
     val willExpire: Instant,
 ) {
     companion object {
-        val DEFAULT_TTL = Duration.parse("PT2H")!!
+        private val DEFAULT_TTL = Duration.parse("PT2H")!!
 
         fun new(
             token: String,

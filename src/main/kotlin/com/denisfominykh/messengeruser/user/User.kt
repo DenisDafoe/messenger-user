@@ -8,5 +8,6 @@ data class User(
     val username: String,
     val region: Region,
     val hashedPassword: String,
+    val salt: String,
     val token: UserToken?,
 )
